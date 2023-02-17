@@ -9,3 +9,5 @@ editor_options:
 ---
 
 Welcome to my research website.
+
+Click on this [link](example.html) to see an example of applying GBCD to simulated Gaussian data. <br /> 

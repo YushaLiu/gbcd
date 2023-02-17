@@ -1,0 +1,49 @@
+---
+title: "Application of GBCD to covariance matrix of simulated Gaussian data"
+author: "Yusha Liu"
+date: "2023-2-17"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Simulation setup
+```{r warning=FALSE, message=FALSE}
+### load in the required R packages
+library(Matrix)
+library(flashier)
+library(truncnorm)
+library(magrittr)
+library(RColorBrewer)
+library(pheatmap)
+
+### load in the functions to implement GBCD
+source("code/util.R")
+
+### load in simulated loadings and factors
+L <- readRDS("data/model.rds")$L
+F <- readRDS("data/model.rds")$F
+
+### plot the true L, and F is simulated to be orthogonal across columns 
+pheatmap(t(t(L)/apply(L, 2, max)), show_rownames = FALSE, cluster_rows = FALSE, cluster_cols = FALSE, 
+         color = colorRampPalette(c("gray96", "red"))(99), breaks = seq(0, 1, length=100), main = "True L")
+
+### simulate data with i.i.d. gaussian errors
+set.seed(100)
+X <- L %*% t(F) + matrix(rnorm(nrow(L)*nrow(F), 0, 1), nrow=nrow(L), ncol=nrow(F))
+
+### calculate XX'
+XXt <- X %*% t(X)/ncol(X)
+
+```
+
+
+### Application of GBCD to the simulated data
+```{r warning=F}
+### apply GBCD to the covariance matrix from simulated data
+res <- fit.gbcd(dat = XXt, Kmax = 11, extrapolate = FALSE, maxiter = 200)
+
+### plot the estimate of L
+plot.gbcd(res, title="Estimated L from GBCD fit to the simulated data")
+
+```
